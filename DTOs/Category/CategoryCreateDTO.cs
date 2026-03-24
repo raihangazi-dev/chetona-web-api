@@ -9,6 +9,7 @@ namespace chetona_web_api.DTOs.Category
     public class CategoryCreateDTO
     {
         [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Name must be 2 characters long and can not be more than 100 characters")]
         public string? Name { get; set; }
         [ Required(ErrorMessage = "Description is required")]
         public string? Description { get; set; }
