@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using chetona_web_api.DTOs.Category;
 using chetona_web_api.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,16 +39,23 @@ namespace chetona_web_api.Controller
         [HttpGet]
         public IActionResult GetAllCategory([FromQuery] string SearchValue = "")
         {
-            if (!string.IsNullOrEmpty(SearchValue))
+            // if (!string.IsNullOrEmpty(SearchValue))
+            // {
+            //     var foundedCategories = Categories.Where(Category => Category.Name.Contains(SearchValue, StringComparison.OrdinalIgnoreCase)).ToList();
+            //     return Ok(foundedCategories);
+            // }
+
+            var allCategories = Categories.Select(Category => new CategoryReadDTO
             {
-                var foundedCategories = Categories.Where(Category => Category.Name.Contains(SearchValue, StringComparison.OrdinalIgnoreCase)).ToList();
-                return Ok(foundedCategories);
-            }
-            return Ok(Categories);
+                Name = Category.Name,
+                Description = Category.Description
+            }).ToList();
+
+            return Ok(allCategories);
         }
 
         [HttpPost]
-        public IActionResult AddNewCategory([FromBody] Category CategoryData)
+        public IActionResult AddNewCategory([FromBody] CategoryCreateDTO CategoryData)
         {
             var newCategory = new Category
             {
@@ -59,11 +67,17 @@ namespace chetona_web_api.Controller
 
             Categories.Add(newCategory);
 
-            return Created($"/api/v1/category/{newCategory.Id}", newCategory);
+            var addedCategory = new CategoryReadDTO
+            {
+              Name = newCategory.Name,
+              Description = newCategory.Description  
+            };
+
+            return Created($"/api/v1/category/{newCategory.Id}", addedCategory);
         }
 
         [HttpPut("{Id:guid}")]
-        public IActionResult UpdateCategory(Guid Id ,[FromBody] Category CategoryData)
+        public IActionResult UpdateCategory(Guid Id ,[FromBody] CategoryUpdateDTO CategoryData)
         {
             var foundedCategory = Categories.FirstOrDefault(Category => Category.Id == Id);
             if (foundedCategory == null)
@@ -74,7 +88,13 @@ namespace chetona_web_api.Controller
             foundedCategory.Name = CategoryData.Name;
             foundedCategory.Description = CategoryData.Description;
 
-            return NoContent();
+            var updatedCategory = new CategoryUpdateDTO
+            {
+                Name = foundedCategory.Name,
+                Description = foundedCategory.Description
+            };
+
+            return Ok(updatedCategory);
         }
 
         [HttpDelete("{Id:guid}")]
