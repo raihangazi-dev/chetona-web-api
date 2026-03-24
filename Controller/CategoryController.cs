@@ -57,6 +57,20 @@ namespace chetona_web_api.Controller
         [HttpPost]
         public IActionResult AddNewCategory([FromBody] CategoryCreateDTO CategoryData)
         {
+            if(!ModelState.IsValid)
+            {
+                var errors = ModelState
+                .Where(error => error.Value.Errors.Count > 0)
+                .Select(x => new
+                {
+                    Field = x.Key,
+                    Errors = x.Value.Errors.Select(y => y.ErrorMessage).ToArray()
+                })
+                .ToList();
+
+                return BadRequest(errors);
+            }
+
             var newCategory = new Category
             {
                 Id = Guid.NewGuid(),
