@@ -58,7 +58,7 @@ app.MapPost("/api/v1/category", ([FromBody] Category CategoryData) =>
     return Results.Created($"/api/v1/category/{newCategory.Id}", newCategory);
 });
 
-app.MapPut("/api/v1/category/{Id}", (Guid Id ,[FromBody] Category CategoryData) =>
+app.MapPut("/api/v1/category/{Id:guid}", (Guid Id ,[FromBody] Category CategoryData) =>
 {
     var foundedCategory = Categories.FirstOrDefault(Category => Category.Id == Id);
     if(foundedCategory == null)
@@ -72,7 +72,7 @@ app.MapPut("/api/v1/category/{Id}", (Guid Id ,[FromBody] Category CategoryData) 
     return Results.NoContent();
 });
 
-app.MapDelete("/api/v1/category/{Id}", (Guid Id) =>
+app.MapDelete("/api/v1/category/{Id:guid}", (Guid Id) =>
 {
     var foundedCategory = Categories.FirstOrDefault(Category => Category.Id == Id);
 
