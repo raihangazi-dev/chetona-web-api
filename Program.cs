@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,22 +26,30 @@ app.MapGet("", () =>
     return Results.Ok("Welcome to Chetona Prokashon Web Server");
 });
 
-app.MapGet("/api/v1/category", () =>
+app.MapGet("/api/v1/category", ([FromQuery] string SearchValue = "") =>
 {
     // var response = new {status = "Success", message = "Respnse for get all category"};
     // return response;
+
+    if(!string.IsNullOrEmpty(SearchValue))
+    {
+        var foundedCategories = Categories.Where(Category => Category.Name.Contains(SearchValue, StringComparison.OrdinalIgnoreCase)).ToList();
+        return Results.Ok(foundedCategories);
+    }
+
+    Console.WriteLine($"{SearchValue}");
 
     return Results.Ok(Categories);
 
 });
 
-app.MapPost("/api/v1/category", () =>
+app.MapPost("/api/v1/category", ([FromBody] Category CategoryData) =>
 {
     var newCategory = new Category
     {
         Id = Guid.NewGuid(),
-        Name = "History",
-        Description = "Know about the history",
+        Name = CategoryData.Name,
+        Description = CategoryData.Description,
         CreatedAt = DateTime.UtcNow
     };
 
@@ -49,23 +58,23 @@ app.MapPost("/api/v1/category", () =>
     return Results.Created($"/api/v1/category/{newCategory.Id}", newCategory);
 });
 
-app.MapPut("/api/v1/category", () =>
+app.MapPut("/api/v1/category/{Id}", (Guid Id ,[FromBody] Category CategoryData) =>
 {
-    var foundedCategory = Categories.FirstOrDefault(Category => Category.Id == Guid.Parse("693dfed0-4d03-49f8-8f63-2385b679f27f"));
+    var foundedCategory = Categories.FirstOrDefault(Category => Category.Id == Id);
     if(foundedCategory == null)
     {
         return Results.NotFound("Category with this Id does not Exist");
     }
 
-    foundedCategory.Name = "Updated Name";
-    foundedCategory.Description = "Updated Description";
+    foundedCategory.Name = CategoryData.Name;
+    foundedCategory.Description = CategoryData.Description;
 
     return Results.NoContent();
 });
 
-app.MapDelete("/api/v1/category", () =>
+app.MapDelete("/api/v1/category/{Id}", (Guid Id) =>
 {
-    var foundedCategory = Categories.FirstOrDefault(Category => Category.Id == Guid.Parse("693dfed0-4d03-49f8-8f63-2385b679f27f"));
+    var foundedCategory = Categories.FirstOrDefault(Category => Category.Id == Id);
 
     if(foundedCategory == null)
     {
